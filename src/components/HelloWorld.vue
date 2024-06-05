@@ -5,11 +5,10 @@ defineProps<{ msg: string }>();
 
 const BASE_URL = "https://rickandmortyapi.com/api";
 
-const count = ref(0);
-const page = ref(1);
-const totalPages = ref(1);
-const heroes = ref([]);
-const loading = ref(false);
+const page = ref<number>(1);
+const totalPages = ref<number>(1);
+const heroes = ref<any[]>([]);
+const loading = ref<boolean>(false);
 
 const fetchHeroes = async () => {
     console.log("Component was mounted");
@@ -57,12 +56,11 @@ const handlePrevPage = () => {
 </script>
 
 <template>
-    <li v-for="(item, index) in heroes">{{ item.name }} - {{ item.status }}</li>
+    <li v-for="item in heroes">{{ item.name }} - {{ item.status }}</li>
 
     <h1>{{ msg }}</h1>
 
     <div class="card">
-        <button type="button" @click="count++">count is {{ count }}</button>
         <button type="button" @click="handlePrevPage">Prev</button>
         <button type="button" @click="">{{ page }} / {{ totalPages }}</button>
         <button type="button" @click="handleNextPage">Next</button>
