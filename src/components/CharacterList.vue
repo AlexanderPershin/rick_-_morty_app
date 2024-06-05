@@ -117,6 +117,12 @@ const handleClearFilters = () => {
 
     <div class="container text-center" v-if="!loading">
         <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div
+                v-if="!heroes.length"
+                class="p-3 my-5 mx-1 w-100 d-flex justify-content-center align-items-center"
+            >
+                Characers list is empty. Try different filters
+            </div>
             <div class="col" v-for="item in heroes">
                 <div class="card p-0">
                     <img
@@ -164,7 +170,7 @@ const handleClearFilters = () => {
     <nav
         aria-label="Page navigation example"
         class="m-1 sticky-bottom"
-        v-if="!loading"
+        v-if="!loading && heroes.length"
     >
         <ul class="pagination">
             <li class="page-item" v-bind:class="{ disabled: page === 1 }">
