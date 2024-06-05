@@ -9,14 +9,28 @@ const BASE_URL = "https://rickandmortyapi.com/api";
 const page = ref<number>(1);
 const totalPages = ref<number>(1);
 const heroes = ref<any[]>([]);
+
+const filterName = ref<string>("");
+const filterStatus = ref<string>("");
+const statusOptions = ref([
+    { text: "All", value: "" },
+    { text: "Alive", value: "Alive" },
+    { text: "Dead", value: "Dead" },
+]);
+
 const loading = ref<boolean>(false);
 
 const fetchHeroes = async () => {
     console.log("Component was mounted");
     try {
-        const heroesResponse = await fetch(
-            `${BASE_URL}/character/?page=${page.value}`
-        );
+        let url = `${BASE_URL}/character/?page=${page.value}`;
+        if (filterName.value) {
+            url += `&name=${filterName.value}`;
+        }
+        if (filterStatus.value) {
+            url += `&status=${filterStatus.value}`;
+        }
+        const heroesResponse = await fetch(url);
         const jsonResponse = await heroesResponse.json();
         console.log("jsonResponse == ", jsonResponse);
         heroes.value = jsonResponse.results;
@@ -34,6 +48,11 @@ watch([page, totalPages], () => {
     fetchHeroes();
 });
 
+watch([filterName, filterStatus], () => {
+    console.log("filterName == ", filterName);
+    console.log("filterStatus == ", filterStatus);
+});
+
 const handleNextPage = () => {
     if (page.value < totalPages.value) {
         page.value++;
@@ -49,11 +68,53 @@ const handleSetPage = (pageToGo: number) => {
         page.value = pageToGo;
     }
 };
+
+const handleFilter = (e: Event) => {
+    e.preventDefault();
+    fetchHeroes();
+};
+const handleClearFilters = () => {
+    page.value = 1;
+    filterName.value = "";
+    filterStatus.value = "";
+    fetchHeroes();
+};
 </script>
 
 <template>
-    <div class="container text-center">
-        <!-- <div class="row row-cols-1 row-cols-md-2 g-4"> -->
+    <form class="d-flex m-1 sticky-top" role="search" @submit="handleFilter">
+        <input
+            class="form-control me-2"
+            type="search"
+            placeholder="Search"
+            aria-label="Search"
+            v-model="filterName"
+        />
+        <select v-model="filterStatus" class="form-control me-2">
+            <option v-for="option in statusOptions" :value="option.value">
+                {{ option.text }}
+            </option>
+        </select>
+        <div class="btn-group" role="group" aria-label="Basic outlined example">
+            <button class="btn btn-outline-success" type="submit">Apply</button>
+            <button
+                class="btn btn-outline-danger"
+                v-if="filterName || filterStatus"
+                type="button"
+                @click="handleClearFilters"
+            >
+                Clear
+            </button>
+        </div>
+    </form>
+
+    <div class="text-center" v-if="loading">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div class="container text-center" v-if="!loading">
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <div class="col" v-for="item in heroes">
                 <div class="card p-0">
@@ -70,7 +131,6 @@ const handleSetPage = (pageToGo: number) => {
                         <li class="list-group-item">
                             Species:
                             {{ item.species }}
-                            {{ item?.type ? `/ ${item.type}` : null }}
                         </li>
                         <li class="list-group-item">
                             Status:
@@ -100,7 +160,11 @@ const handleSetPage = (pageToGo: number) => {
         </div>
     </div>
 
-    <nav aria-label="Page navigation example">
+    <nav
+        aria-label="Page navigation example"
+        class="m-1 sticky-bottom"
+        v-if="!loading"
+    >
         <ul class="pagination">
             <li class="page-item" v-bind:class="{ disabled: page === 1 }">
                 <a class="page-link" href="#" @click="handlePrevPage"
