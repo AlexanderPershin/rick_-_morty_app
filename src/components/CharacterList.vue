@@ -71,6 +71,7 @@ const handleSetPage = (pageToGo: number) => {
 
 const handleFilter = (e: Event) => {
     e.preventDefault();
+    page.value = 1;
     fetchHeroes();
 };
 const handleClearFilters = () => {
